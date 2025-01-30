@@ -18,14 +18,21 @@
         .section {
             display: none;
             margin: 20px auto;
-            max-width: 1000px;
+            max-width: 1200px;
+        }
+
+        .content-wrapper {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 20px;
+            margin: 20px auto;
         }
 
         .violao-container {
             position: relative;
             width: 400px;
             height: 400px;
-            margin: 40px auto;
         }
 
         .violao-img {
@@ -59,10 +66,43 @@
             transform: scale(1.2);
         }
 
+        .media-container {
+            flex: 1;
+            max-width: 500px;
+        }
+
+        #nosso-video {
+            width: 100%;
+            display: none;
+            border-radius: 10px;
+        }
+
+        #continuar-btn {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #continuar-btn:hover {
+            background: #c0392b;
+        }
+
         #chord-sequence {
             font-size: 24px;
             margin: 20px;
             color: #ecf0f1;
+        }
+
+        #feedback {
+            font-size: 18px;
+            margin: 20px;
         }
     </style>
 </head>
@@ -77,15 +117,20 @@
     <!-- Tela 2: Desafio Musical -->
     <div id="music-challenge" class="section">
         <h2>🎸 Encontre a Sequência Secreta</h2>
-        <div class="violao-container">
-          <img src="img/violao.png" class="violao-img" alt="Violão"> <!-- Imagem do violão -->
-            <!-- Acordes serão adicionados via JavaScript -->
+        <div class="content-wrapper">
+            <div class="violao-container">
+                <img src="img/violao.png" class="violao-img" alt="Violão">
+                <!-- Acordes serão adicionados via JavaScript -->
+            </div>
+            <div class="media-container">
+                <video id="nosso-video" controls muted>
+                    <source src="video/nossovideo.mp4" type="video/mp4">
+                </video>
+                <button id="continuar-btn">Continuar para a Surpresa 🎉</button>
+            </div>
         </div>
         <div id="chord-sequence"></div>
-        <p id="feedback" style="font-size: 18px;"></p>
-        <video id="nosso-video" width="400" controls muted>
-            <source src="video/nossovideo.mp4" type="video/mp4">
-        </video>
+        <p id="feedback"></p>
     </div>
 
     <!-- Tela 3: Surpresa Final -->
@@ -116,7 +161,7 @@
             "Bm": "sounds/Bm.mp3",
             "C": "sounds/C.mp3",
             "Cm": "sounds/Cm.mp3",
-            "D": "sounds/Dm.mp3",
+            "D": "sounds/D.mp3",
             "Dm": "sounds/Dm.mp3",
             "E": "sounds/E.mp3",
             "Em": "sounds/Em.mp3",
@@ -171,13 +216,26 @@
         }
 
         function verificarAcordes() {
+            const video = document.getElementById("nosso-video");
+
+            // Verifica progresso parcial
+            const progresso = acordesInseridos.filter((acorde, i) => acorde === ACORDES_CORRETOS[i]).length;
+
+            // Ativa o vídeo no primeiro acorde correto
+            if (progresso === 1 && acordesInseridos.length === 1) {
+                video.style.display = 'block';
+                video.muted = true;
+                video.play();
+            }
+
+            // Completa a sequência
             if (JSON.stringify(acordesInseridos) === JSON.stringify(ACORDES_CORRETOS)) {
                 document.getElementById("feedback").innerHTML = "✨ Você conseguiu! A música está completa!";
-                document.getElementById("nosso-video").muted = false;
+                video.muted = false;
+
+                // Mostra botão de continuar após 3 segundos
                 setTimeout(() => {
-                    document.getElementById("music-challenge").style.display = "none";
-                    document.getElementById("surpresa-final").style.display = "block";
-                    document.getElementById("dica-final").textContent = DICA_FINAL;
+                    document.getElementById("continuar-btn").style.display = 'block';
                 }, 3000);
             } else if (acordesInseridos.length >= ACORDES_CORRETOS.length) {
                 document.getElementById("feedback").innerHTML = "🎶 Quase lá! A sequência correta tem 3 acordes...";
@@ -197,6 +255,12 @@
             } else if (e.target.value.length >= SENHA_CORRETA.length) {
                 document.getElementById("password-error").style.display = "block";
             }
+        });
+
+        document.getElementById("continuar-btn").addEventListener("click", () => {
+            document.getElementById("music-challenge").style.display = "none";
+            document.getElementById("surpresa-final").style.display = "block";
+            document.getElementById("dica-final").textContent = DICA_FINAL;
         });
 
         document.getElementById("password-screen").style.display = "block";
