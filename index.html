@@ -18,7 +18,7 @@
         .section {
             display: none;
             margin: 20px auto;
-            max-width: 1200px;
+            max-width: 1000px;
         }
 
         .content-wrapper {
@@ -26,7 +26,7 @@
             justify-content: center;
             gap: 50px;
             align-items: center;
-            margin-top: 30px;
+            margin: 40px 0;
         }
 
         .violao-container {
@@ -74,13 +74,14 @@
 
         #video-container {
             width: 500px;
-            position: relative;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
         }
 
         #nosso-video {
             width: 100%;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            height: auto;
         }
 
         #continuar-btn {
@@ -141,19 +142,29 @@
         const DICA_FINAL = "Sua próxima pista está na capa do nosso primeiro álbum!";
         const ACORDES = ["A", "Am", "B", "Bm", "C", "Cm", "D", "Dm", "E", "Em", "F", "Fm", "G", "Gm"];
 
-        // Elementos
-        const video = document.getElementById('nosso-video');
-        let correctSequenceProgress = 0;
+        // Variáveis de estado
         let acordesInseridos = [];
-
-        // Sons
-        const samples = { /* ... (mantenha seus samples) ... */ };
+        let acertosParciais = 0;
+        const video = document.getElementById('nosso-video');
         const player = new Tone.Player().toDestination();
+        
+        // Sons de violão (ajuste os caminhos)
+        const samples = {
+            "Am": "sounds/Am.mp3",
+            "F": "sounds/F.mp3",
+            "G": "sounds/G.mp3",
+            // ... outros acordes
+        };
 
         // Inicialização
-        video.pause();
-        video.currentTime = 0;
+        function init() {
+            video.pause();
+            video.currentTime = 0;
+            video.playbackRate = 1;
+            criarBotoesAcordes();
+        }
 
+        // Criação dos botões de acorde
         function criarBotoesAcordes() {
             const container = document.querySelector('.violao-container');
             const radius = 150;
@@ -169,76 +180,79 @@
                 btn.style.left = `${center.x + radius * Math.cos(angle) - 25}px`;
                 btn.style.top = `${center.y + radius * Math.sin(angle) - 25}px`;
 
-                btn.addEventListener('click', () => {
-                    const chord = btn.dataset.chord;
-                    tocarAcorde(chord);
-                    verificarProgresso(chord);
-                });
+                btn.addEventListener('click', () => tocarAcorde(acorde));
                 container.appendChild(btn);
             });
         }
 
-        function verificarProgresso(acorde) {
-            if (acorde === ACORDES_CORRETOS[correctSequenceProgress]) {
-                correctSequenceProgress++;
-                
-                // Atualiza velocidade do vídeo
-                switch(correctSequenceProgress) {
-                    case 1:
-                        video.playbackRate = 0.25;
-                        video.play();
-                        break;
-                    case 2:
-                        video.playbackRate = 0.5;
-                        break;
-                    case 3:
-                        video.playbackRate = 1.0;
-                        video.muted = false;
-                        mostrarBotaoContinuar();
-                        break;
-                }
+        // Lógica principal
+        function tocarAcorde(acorde) {
+            acordesInseridos.push(acorde);
+            document.getElementById('chord-sequence').textContent = acordesInseridos.join(' → ');
+
+            // Verifica acertos na sequência
+            if (acorde === ACORDES_CORRETOS[acertosParciais]) {
+                acertosParciais++;
+                atualizarVideo();
             } else {
-                resetarProgresso();
+                acertosParciais = 0;
+                acordesInseridos = [];
+                document.getElementById('feedback').textContent = "Sequência errada! Comece novamente.";
+                document.getElementById('chord-sequence').textContent = '';
+                video.pause();
+                video.currentTime = 0;
             }
 
-            document.getElementById('chord-sequence').textContent = 
-                ACORDES_CORRETOS.slice(0, correctSequenceProgress).join(' → ');
+            // Toca o som
+            if (samples[acorde]) {
+                player.load(samples[acorde]).then(() => player.start());
+            }
+
+            verificarVitoria();
         }
 
-        function resetarProgresso() {
-            correctSequenceProgress = 0;
-            video.pause();
-            video.currentTime = 0;
-            video.muted = true;
-            document.getElementById('chord-sequence').textContent = '';
-            document.getElementById('feedback').textContent = '❌ Sequência incorreta! Tente novamente.';
+        // Atualiza o vídeo conforme progresso
+        function atualizarVideo() {
+            if (acertosParciais === 1) {
+                video.playbackRate = 0.25;
+                video.play();
+            } else if (acertosParciais === 2) {
+                video.playbackRate = 0.5;
+            } else if (acertosParciais === 3) {
+                video.playbackRate = 1;
+                video.muted = false;
+            }
         }
 
-        function mostrarBotaoContinuar() {
-            document.getElementById('feedback').textContent = '🎉 Sequência completa!';
-            setTimeout(() => {
-                document.getElementById('continuar-btn').style.display = 'block';
-            }, 2000);
+        // Verifica vitória
+        function verificarVitoria() {
+            if (acertosParciais === ACORDES_CORRETOS.length) {
+                document.getElementById("feedback").innerHTML = "✨ Sequência completa!";
+                setTimeout(() => {
+                    document.getElementById("continuar-btn").style.display = 'block';
+                }, 2000);
+            }
         }
 
-        // Event Listeners
-        document.getElementById('continuar-btn').addEventListener('click', () => {
-            document.getElementById('music-challenge').style.display = 'none';
-            document.getElementById('surpresa-final').style.display = 'block';
-            document.getElementById('dica-final').textContent = DICA_FINAL;
-        });
-
-        document.getElementById('password-input').addEventListener('keyup', (e) => {
+        // Event listeners
+        document.getElementById("password-input").addEventListener("keyup", (e) => {
             if (e.target.value.toLowerCase() === SENHA_CORRETA) {
-                document.getElementById('password-screen').style.display = 'none';
-                document.getElementById('music-challenge').style.display = 'block';
-                criarBotoesAcordes();
+                document.getElementById("password-screen").style.display = "none";
+                document.getElementById("music-challenge").style.display = "block";
+                init();
             } else if (e.target.value.length >= SENHA_CORRETA.length) {
-                document.getElementById('password-error').style.display = 'block';
+                document.getElementById("password-error").style.display = "block";
             }
         });
 
-        document.getElementById('password-screen').style.display = 'block';
+        document.getElementById("continuar-btn").addEventListener("click", () => {
+            document.getElementById("music-challenge").style.display = "none";
+            document.getElementById("surpresa-final").style.display = "block";
+            document.getElementById("dica-final").textContent = DICA_FINAL;
+        });
+
+        // Inicia com a tela de senha
+        document.getElementById("password-screen").style.display = "block";
     </script>
 </body>
 </html>
