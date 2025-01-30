@@ -66,15 +66,10 @@
             transform: scale(1.2);
         }
 
-        .media-container {
-            flex: 1;
-            max-width: 500px;
-        }
-
-        #nosso-video {
-            width: 100%;
-            display: none;
-            border-radius: 10px;
+        #chord-sequence {
+            font-size: 24px;
+            margin: 20px;
+            color: #ecf0f1;
         }
 
         #continuar-btn {
@@ -84,8 +79,8 @@
             background: #e74c3c;
             color: white;
             border: none;
-            border-radius: 5px;
-            font-size: 16px;
+            border-radius: 8px;
+            font-size: 18px;
             cursor: pointer;
             transition: background 0.3s;
         }
@@ -94,15 +89,10 @@
             background: #c0392b;
         }
 
-        #chord-sequence {
-            font-size: 24px;
-            margin: 20px;
-            color: #ecf0f1;
-        }
-
-        #feedback {
-            font-size: 18px;
-            margin: 20px;
+        video {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 10px;
         }
     </style>
 </head>
@@ -130,7 +120,7 @@
             </div>
         </div>
         <div id="chord-sequence"></div>
-        <p id="feedback"></p>
+        <p id="feedback" style="font-size: 18px;"></p>
     </div>
 
     <!-- Tela 3: Surpresa Final -->
@@ -221,49 +211,11 @@
             // Verifica progresso parcial
             const progresso = acordesInseridos.filter((acorde, i) => acorde === ACORDES_CORRETOS[i]).length;
 
-            // Ativa o vídeo no primeiro acorde correto
+            // Inicia o vídeo mudo no primeiro acorde correto
             if (progresso === 1 && acordesInseridos.length === 1) {
-                video.style.display = 'block';
                 video.muted = true;
                 video.play();
             }
 
             // Completa a sequência
-            if (JSON.stringify(acordesInseridos) === JSON.stringify(ACORDES_CORRETOS)) {
-                document.getElementById("feedback").innerHTML = "✨ Você conseguiu! A música está completa!";
-                video.muted = false;
-
-                // Mostra botão de continuar após 3 segundos
-                setTimeout(() => {
-                    document.getElementById("continuar-btn").style.display = 'block';
-                }, 3000);
-            } else if (acordesInseridos.length >= ACORDES_CORRETOS.length) {
-                document.getElementById("feedback").innerHTML = "🎶 Quase lá! A sequência correta tem 3 acordes...";
-                acordesInseridos = [];
-                document.getElementById('chord-sequence').textContent = '';
-            }
-        }
-
-        // =================================
-        // Controle de Telas
-        // =================================
-        document.getElementById("password-input").addEventListener("keyup", (e) => {
-            if (e.target.value.toLowerCase() === SENHA_CORRETA) {
-                document.getElementById("password-screen").style.display = "none";
-                document.getElementById("music-challenge").style.display = "block";
-                criarBotoesAcordes();
-            } else if (e.target.value.length >= SENHA_CORRETA.length) {
-                document.getElementById("password-error").style.display = "block";
-            }
-        });
-
-        document.getElementById("continuar-btn").addEventListener("click", () => {
-            document.getElementById("music-challenge").style.display = "none";
-            document.getElementById("surpresa-final").style.display = "block";
-            document.getElementById("dica-final").textContent = DICA_FINAL;
-        });
-
-        document.getElementById("password-screen").style.display = "block";
-    </script>
-</body>
-</html>
+            if (JSON.stringify(acordesInseridos) === JSON
