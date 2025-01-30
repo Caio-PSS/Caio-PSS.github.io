@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Surpresa Musical 🎸</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a, #4a4a4a);
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .section {
+            display: none;
+            margin: 20px auto;
+            max-width: 1000px;
+        }
+
+        .violao-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 40px auto;
+        }
+
+        .violao-img {
+            width: 250px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+
+        .chord-btn {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #e74c3c;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .chord-btn:hover {
+            background: #e74c3c;
+            color: white;
+            transform: scale(1.2);
+        }
+
+        #chord-sequence {
+            font-size: 24px;
+            margin: 20px;
+            color: #ecf0f1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Tela 1: Senha -->
+    <div id="password-screen" class="section">
+        <h1>🎵 Bem-vinda ao Nosso Universo Musical</h1>
+        <input type="password" id="password-input" placeholder="🔑 Insira a senha...">
+        <p id="password-error" style="color: #e74c3c; display: none;">Tente novamente!</p>
+    </div>
+
+    <!-- Tela 2: Desafio Musical -->
+    <div id="music-challenge" class="section">
+        <h2>🎸 Encontre a Sequência Secreta</h2>
+        <div class="violao-container">
+          <img src="img/violao.png" class="violao-img" alt="Violão"> <!-- Imagem do violão -->
+            <!-- Acordes serão adicionados via JavaScript -->
+        </div>
+        <div id="chord-sequence"></div>
+        <p id="feedback" style="font-size: 18px;"></p>
+        <video id="nosso-video" width="400" controls muted>
+            <source src="video/nosso-video.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <!-- Tela 3: Surpresa Final -->
+    <div id="surpresa-final" class="section">
+        <h2>🎉 Parabéns, Amor!</h2>
+        <p id="dica-final" style="font-size: 20px;"></p>
+        <img src="img/surpresa.jpg" width="300" style="border-radius: 15px;">
+    </div>
+
+    <script>
+        // =================================
+        // Configurações
+        // =================================
+        const SENHA_CORRETA = "alterego";
+        const ACORDES_CORRETOS = ["Am", "F", "G"]; // Sequência correta
+        const DICA_FINAL = "Sua próxima pista está na capa do nosso primeiro álbum!";
+
+        // Lista de acordes disponíveis
+        const ACORDES = ["A", "Am", "B", "Bm", "C", "Cm", "D", "Dm", "E", "Em", "F", "Fm", "G", "Gm"];
+
+        // =================================
+        // Sons de Violão (substitua os links!)
+        // =================================
+        const samples = {
+            "A": "sounds/A.mp3",
+            "Am": "sounds/Am.mp3",
+            "B": "sounds/B.mp3",
+            "Bm": "sounds/Bm.mp3",
+            "C": "sounds/C.mp3",
+            "Cm": "sounds/Cm.mp3",
+            "D": "sounds/Dm.mp3",
+            "Dm": "sounds/Dm.mp3",
+            "E": "sounds/E.mp3",
+            "Em": "sounds/Em.mp3",
+            "F": "sounds/F.mp3",
+            "Fm": "sounds/Fm.mp3",
+            "G": "sounds/G.mp3",
+            "Gm": "sounds/Gm.mp3"
+        };
+
+        const player = new Tone.Player().toDestination();
+
+        // =================================
+        // Criação dos Botões de Acorde
+        // =================================
+        function criarBotoesAcordes() {
+            const container = document.querySelector('.violao-container');
+            const radius = 150; // Raio do círculo ao redor do violão
+            const center = { x: 200, y: 200 }; // Centro do container
+
+            ACORDES.forEach((acorde, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'chord-btn';
+                btn.textContent = acorde;
+                btn.dataset.chord = acorde;
+
+                // Posicionamento em círculo
+                const angle = (index * (360 / ACORDES.length)) * (Math.PI / 180);
+                btn.style.left = `${center.x + radius * Math.cos(angle) - 25}px`;
+                btn.style.top = `${center.y + radius * Math.sin(angle) - 25}px`;
+
+                // Evento de clique
+                btn.addEventListener('click', () => tocarAcorde(acorde));
+                container.appendChild(btn);
+            });
+        }
+
+        // =================================
+        // Lógica do Jogo
+        // =================================
+        let acordesInseridos = [];
+
+        function tocarAcorde(acorde) {
+            acordesInseridos.push(acorde);
+            document.getElementById('chord-sequence').textContent = acordesInseridos.join(' → ');
+
+            // Toca o som (substitua pelo sample real)
+            if (samples[acorde]) {
+                player.load(samples[acorde]).then(() => player.start());
+            }
+
+            verificarAcordes();
+        }
+
+        function verificarAcordes() {
+            if (JSON.stringify(acordesInseridos) === JSON.stringify(ACORDES_CORRETOS)) {
+                document.getElementById("feedback").innerHTML = "✨ Você conseguiu! A música está completa!";
+                document.getElementById("nosso-video").muted = false;
+                setTimeout(() => {
+                    document.getElementById("music-challenge").style.display = "none";
+                    document.getElementById("surpresa-final").style.display = "block";
+                    document.getElementById("dica-final").textContent = DICA_FINAL;
+                }, 3000);
+            } else if (acordesInseridos.length >= ACORDES_CORRETOS.length) {
+                document.getElementById("feedback").innerHTML = "🎶 Quase lá! A sequência correta tem 3 acordes...";
+                acordesInseridos = [];
+                document.getElementById('chord-sequence').textContent = '';
+            }
+        }
+
+        // =================================
+        // Controle de Telas
+        // =================================
+        document.getElementById("password-input").addEventListener("keyup", (e) => {
+            if (e.target.value.toLowerCase() === SENHA_CORRETA) {
+                document.getElementById("password-screen").style.display = "none";
+                document.getElementById("music-challenge").style.display = "block";
+                criarBotoesAcordes();
+            } else if (e.target.value.length >= SENHA_CORRETA.length) {
+                document.getElementById("password-error").style.display = "block";
+            }
+        });
+
+        document.getElementById("password-screen").style.display = "block";
+    </script>
+</body>
+</html>
