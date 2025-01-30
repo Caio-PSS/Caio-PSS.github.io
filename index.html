@@ -100,9 +100,29 @@
         #continuar-btn:hover {
             transform: scale(1.05);
         }
+        .mobile-warning {
+      display: none;
+      text-align: center;
+      margin-top: 20%;
+    }
+
+    /* Mostrar aviso apenas em telas pequenas */
+    @media screen and (max-width: 768px) {
+      body {
+        display: none;
+      }
+
+      .mobile-warning {
+        display: block;
+      }
+    }
     </style>
 </head>
 <body>
+    <div class="mobile-warning">
+    <h1>Este site só pode ser acessado em computadores!</h1>
+    <p>Por favor, acesse em um dispositivo desktop.</p>
+    </div>
     <!-- Tela 1: Senha -->
     <div id="password-screen" class="section">
         <h1>🎵 Bem-vinda ao Nosso Universo Musical</h1>
