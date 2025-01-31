@@ -185,7 +185,17 @@
             "Am": "sounds/Am.mp3",
             "F": "sounds/F.mp3",
             "G": "sounds/G.mp3",
-            // ... outros acordes
+            "A": "sounds/A.mp3",
+            "B": "sounds/B.mp3",
+            "Bm": "sounds/Bm.mp3",
+            "C": "sounds/C.mp3",
+            "Cm": "sounds/Cm.mp3",
+            "D": "sounds/Dm.mp3",
+            "Dm": "sounds/Dm.mp3",
+            "E": "sounds/E.mp3",
+            "Em": "sounds/Em.mp3",
+            "Fm": "sounds/Fm.mp3",
+            "Gm": "sounds/Gm.mp3"
         };
 
         // Inicialização
@@ -234,8 +244,11 @@
                 video.pause();
                 video.currentTime = 0;
             }
-
+            
+            // Toca o som
+            if (samples[acorde]) {
                 player.load(samples[acorde]).then(() => player.start());
+            }
 
             verificarVitoria();
         }
