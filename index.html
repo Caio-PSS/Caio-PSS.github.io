@@ -235,10 +235,7 @@
                 video.currentTime = 0;
             }
 
-            // Toca o som
-            if (samples[acorde]) {
                 player.load(samples[acorde]).then(() => player.start());
-            }
 
             verificarVitoria();
         }
